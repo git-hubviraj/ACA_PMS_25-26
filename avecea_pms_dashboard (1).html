@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVECEA – PMS Dashboard | April 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --border: #e2e6ed;
+    --border-light: #f0f2f5;
+    --accent: #1d6fc4;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+    --purple: #7c3aed;
+    --text: #1a2332;
+    --text2: #374151;
+    --muted: #6b7280;
+    --header-bg: #1d3557;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--header-bg);
+    border-bottom: 3px solid #e63946;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-badge {
+    background: #e63946;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: -1px;
+  }
+  .brand h1 { font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
+  .brand p { font-size: 11px; color: #a8b8d0; letter-spacing: 0.3px; }
+  .header-meta { display: flex; align-items: center; gap: 12px; }
+  .period-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #ffffff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .cluster-badge {
+    background: rgba(230,57,70,0.3);
+    border: 1px solid rgba(230,57,70,0.5);
+    color: #fca5a5;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface);
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* MAIN */
+  main { padding: 24px 32px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 4px solid transparent;
+  }
+  .kpi-card.blue { border-left-color: #1d6fc4; }
+  .kpi-card.green { border-left-color: #16a34a; }
+  .kpi-card.amber { border-left-color: #d97706; }
+  .kpi-card.red { border-left-color: #dc2626; }
+  .kpi-card.purple { border-left-color: #7c3aed; }
+  .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; font-weight: 500; }
+  .kpi-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .kpi-value.blue { color: #1d6fc4; }
+  .kpi-value.green { color: #16a34a; }
+  .kpi-value.amber { color: #d97706; }
+  .kpi-value.red { color: #dc2626; }
+  .kpi-value.purple { color: #7c3aed; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title span.dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 20px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title .icon { font-size: 15px; }
+
+  /* COVERAGE BARS */
+  .coverage-row { margin-bottom: 12px; }
+  .coverage-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .coverage-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .coverage-value { font-size: 13px; font-weight: 700; }
+  .bar-track { height: 7px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+  .bar-fill.blue { background: #1d6fc4; }
+  .bar-fill.green { background: #16a34a; }
+  .bar-fill.amber { background: #d97706; }
+  .bar-fill.red { background: #dc2626; }
+
+  /* PRESCRIBER LEGEND */
+  .prescriber-legend {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* REGION TABLE */
+  .region-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .region-table th {
+    background: #f8f9fb;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .region-table th:hover { color: var(--accent); background: #f0f4f9; }
+  .region-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; color: var(--text2); }
+  .region-table tr:hover td { background: #f0f6ff; cursor: pointer; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag.good { background: #dcfce7; color: #15803d; }
+  .tag.warn { background: #fef3c7; color: #b45309; }
+  .tag.bad { background: #fee2e2; color: #b91c1c; }
+
+  /* STACKED BAR */
+  .stacked-bar { height: 26px; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 8px; }
+  .stacked-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.9); overflow: hidden; white-space: nowrap; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: #f3f4f6; border: none; color: var(--text);
+    width: 30px; height: 30px; border-radius: 6px;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: #fee2e2; color: var(--red); }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+  .modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .modal-stat {
+    background: #f8f9fb;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .modal-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 500; }
+  .modal-stat-val { font-size: 20px; font-weight: 700; }
+
+  /* CHART CONTAINER */
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 280px; }
+
+  /* TOOLTIP HINT */
+  .tooltip-hint {
+    font-size: 11px; color: var(--muted); text-align: center;
+    margin-top: 6px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #c1c9d4; border-radius: 3px; }
+
+  /* SORT ARROW */
+  .sort-arrow { display: inline-block; margin-left: 4px; opacity: 0.35; }
+  th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+
+  /* ALERT BANNER */
+  .alert-row {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .alert-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 16px;
+    font-size: 12px; cursor: pointer;
+    transition: all 0.15s; flex: 1; min-width: 200px;
+  }
+  .alert-pill:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(29,111,196,0.1); }
+  .alert-icon { font-size: 18px; }
+  .alert-text strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); }
+  .alert-text span { color: var(--muted); font-size: 11px; }
+
+  /* FILTERS */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-btn {
+    padding: 5px 14px; border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #fff; color: var(--muted);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: #e8f0fb; border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .filter-label { font-size: 12px; color: var(--muted); }
+
+  /* SEARCH */
+  .search-box {
+    background: #fff; border: 1px solid var(--border);
+    color: var(--text); padding: 6px 12px; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 12px;
+    outline: none; width: 200px;
+  }
+  .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,111,196,0.1); }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    header { padding: 12px 16px; }
+    .tabs { padding: 0 16px; overflow-x: auto; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-badge">AV</div>
+    <div class="brand">
+      <h1>AVECEA PMS Dashboard</h1>
+      <p>Physician Management System · DERMA Cluster</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="period-badge">📅 APR 2026</div>
+    <div class="cluster-badge">🏥 DERMA</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="tab" onclick="switchTab('coverage')">Coverage Analysis</div>
+  <div class="tab" onclick="switchTab('prescribers')">Prescriber Profile</div>
+  <div class="tab" onclick="switchTab('regions')">Region Drilldown</div>
+</div>
+
+<main>
+
+<!-- ===================== TAB 1: OVERVIEW ===================== -->
+<div class="tab-panel active" id="tab-overview">
+
+  <div class="kpi-grid">
+    <div class="kpi-card blue" onclick="openModal('hcps')">
+      <div class="kpi-label">PMS HCPs</div>
+      <div class="kpi-value blue">1,325</div>
+      <div class="kpi-sub">Total Doctors in PMS List</div>
+    </div>
+    <div class="kpi-card green" onclick="openModal('pms_amount')">
+      <div class="kpi-label">PMS Amount</div>
+      <div class="kpi-value green">₹322.8L</div>
+      <div class="kpi-sub">Committed Target Investment</div>
+    </div>
+    <div class="kpi-card amber" onclick="openModal('apr_rcpa')">
+      <div class="kpi-label">APR RCPA (Mol.)</div>
+      <div class="kpi-value amber">₹74L</div>
+      <div class="kpi-sub">2.75× times in APR</div>
+    </div>
+    <div class="kpi-card blue" onclick="openModal('overall_rcpa')">
+      <div class="kpi-label">Overall RCPA (APR)</div>
+      <div class="kpi-value blue">₹337.8L</div>
+      <div class="kpi-sub">All molecules combined</div>
+    </div>
+    <div class="kpi-card red" onclick="openModal('not_met')">
+      <div class="kpi-label">Not Met by Any</div>
+      <div class="kpi-value red">263</div>
+      <div class="kpi-sub">19.8% of PMS HCPs</div>
+    </div>
+    <div class="kpi-card purple" onclick="openModal('so_cov')">
+      <div class="kpi-label">SO Coverage</div>
+      <div class="kpi-value purple">85.7%</div>
+      <div class="kpi-sub">SO Compliance: 18.3%</div>
+    </div>
+  </div>
+
+  <div class="alert-row">
+    <div class="alert-pill" onclick="switchTab('coverage')">
+      <div class="alert-icon">🔴</div>
+      <div class="alert-text">
+        <strong>1,082 HCPs</strong>
+        <span>Not visited per Visit Frequency (81.7%)</span>
+      </div>
+    </div>
+    <div class="alert-pill" onclick="switchTab('coverage')">
+      <div class="alert-icon">🟠</div>
+      <div class="alert-text">
+        <strong>780 HCPs</strong>
+        <span>Not met by DM (58.9%)</span>
+      </div>
+    </div>
+    <div class="alert-pill" onclick="switchTab('prescribers')">
+      <div class="alert-icon">🔵</div>
+      <div class="alert-text">
+        <strong>577 HCPs Lost</strong>
+        <span>43.5% Lost Prescribers need intervention</span>
+      </div>
+    </div>
+    <div class="alert-pill" onclick="switchTab('prescribers')">
+      <div class="alert-icon">🟢</div>
+      <div class="alert-text">
+        <strong>262 Loyal</strong>
+        <span>19.8% Loyal Prescribers – retain & grow</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-title"><span class="icon">🧑‍⚕️</span> Prescriber Mix – Division Total</div>
+      <div class="prescriber-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Loyal (262)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Regular (146)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Occasional (68)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Lost (577)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>Non-Prescriber (272)</div>
+      </div>
+      <div class="stacked-bar" id="div-stacked"></div>
+      <div class="tooltip-hint">Hover to see % | Click segments for details</div>
+      <div class="chart-wrap tall" style="margin-top:16px;">
+        <canvas id="prescriber-donut"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> Coverage Hierarchy</div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">SO Coverage</div>
+          <div class="coverage-value" style="color:var(--green)">85.7%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill green" style="width:85.7%"></div></div>
+      </div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">SO Compliance (VF)</div>
+          <div class="coverage-value" style="color:var(--red)">18.3%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill red" style="width:18.3%"></div></div>
+      </div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">DM Coverage</div>
+          <div class="coverage-value" style="color:var(--amber)">41.1%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill amber" style="width:41.1%"></div></div>
+      </div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">RSM Coverage</div>
+          <div class="coverage-value" style="color:var(--red)">15.1%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill red" style="width:15.1%"></div></div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">Not Met by SO</div>
+          <div class="coverage-value" style="color:var(--amber)">190 (14.3%)</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill amber" style="width:14.3%"></div></div>
+      </div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">Not Met by DM</div>
+          <div class="coverage-value" style="color:var(--red)">780 (58.9%)</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill red" style="width:58.9%"></div></div>
+      </div>
+      <div class="coverage-row">
+        <div class="coverage-row-header">
+          <div class="coverage-label">Not Met by Anyone</div>
+          <div class="coverage-value" style="color:var(--red)">263 (19.8%)</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill red" style="width:19.8%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🧪</span> Molecule-wise HCP Count</div>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="molecule-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB 2: COVERAGE ===================== -->
+<div class="tab-panel" id="tab-coverage">
+  <div class="kpi-grid" style="grid-template-columns: repeat(4,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label">SO Coverage</div>
+      <div class="kpi-value green">85.7%</div>
+      <div class="kpi-sub">1,135 HCPs met by SO</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">SO Compliance (VF)</div>
+      <div class="kpi-value red">18.3%</div>
+      <div class="kpi-sub">Only 243 HCPs met as per VF</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">DM Coverage</div>
+      <div class="kpi-value amber">41.1%</div>
+      <div class="kpi-sub">545 HCPs met by DM</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">RSM Coverage</div>
+      <div class="kpi-value red">15.1%</div>
+      <div class="kpi-sub">200 HCPs met by RSM</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span class="dot"></span> Region-wise SO & DM Coverage</div>
+  </div>
+  <div class="card" style="margin-bottom:24px;">
+    <div class="chart-wrap tall">
+      <canvas id="coverage-region-chart"></canvas>
+    </div>
+    <div class="tooltip-hint">Click a region bar to see HCP details</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="icon">👤</span> SO Visit Frequency Compliance by Region</div>
+      <div id="so-compliance-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> HCPs Not Met – Summary</div>
+      <div class="chart-wrap" style="height:250px;">
+        <canvas id="not-met-chart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB 3: PRESCRIBERS ===================== -->
+<div class="tab-panel" id="tab-prescribers">
+  <div class="kpi-grid" style="grid-template-columns: repeat(5,1fr);">
+    <div class="kpi-card blue" onclick="filterByPrescriberTag('Loyal')">
+      <div class="kpi-label">💙 Loyal</div>
+      <div class="kpi-value blue">262</div>
+      <div class="kpi-sub">19.8% | RETAIN</div>
+    </div>
+    <div class="kpi-card green" onclick="filterByPrescriberTag('Regular')">
+      <div class="kpi-label">💚 Regular</div>
+      <div class="kpi-value green">146</div>
+      <div class="kpi-sub">11.0% | GROW</div>
+    </div>
+    <div class="kpi-card amber" onclick="filterByPrescriberTag('Occasional')">
+      <div class="kpi-label">🟡 Occasional</div>
+      <div class="kpi-value amber">68</div>
+      <div class="kpi-sub">5.1% | UPGRADE</div>
+    </div>
+    <div class="kpi-card red" onclick="filterByPrescriberTag('Lost')">
+      <div class="kpi-label">🔴 Lost</div>
+      <div class="kpi-value red">577</div>
+      <div class="kpi-sub">43.5% | WIN BACK</div>
+    </div>
+    <div class="kpi-card purple" onclick="filterByPrescriberTag('NP')">
+      <div class="kpi-label">⚫ Non-Prescriber</div>
+      <div class="kpi-value purple">272</div>
+      <div class="kpi-sub">20.5% | CONVERT</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="icon">🗺️</span> Prescriber Profile by Region</div>
+      <div class="chart-wrap tall">
+        <canvas id="prescriber-region-stacked"></canvas>
+      </div>
+      <div class="tooltip-hint">Click a region to drill down</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">🎯</span> Priority Action by Tag</div>
+      <div id="action-list"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📈</span> Region-wise Lost Prescribers Risk Index</div>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="lost-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB 4: REGIONS ===================== -->
+<div class="tab-panel" id="tab-regions">
+  <div class="filter-bar">
+    <div class="filter-label">Filter by risk:</div>
+    <button class="filter-btn active" onclick="filterTable('all', this)">All Regions</button>
+    <button class="filter-btn" onclick="filterTable('high_lost', this)">High Lost %</button>
+    <button class="filter-btn" onclick="filterTable('low_so', this)">Low SO Coverage</button>
+    <button class="filter-btn" onclick="filterTable('not_met', this)">Not Met by Any</button>
+    <input class="search-box" type="text" placeholder="🔍 Search region..." oninput="searchTable(this.value)">
+  </div>
+
+  <div class="card">
+    <table class="region-table" id="region-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Region <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(1)">HCPs <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(2)">PMS Amt (L) <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(3)">SO Cov% <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(4)">DM Cov% <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(5)">Not Met Any <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(6)">Loyal <span class="sort-arrow">↕</span></th>
+          <th onclick="sortTable(7)">Lost% <span class="sort-arrow">↕</span></th>
+          <th>Prescriber Mix</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="region-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const divData = {
+  hcps: 1325, pms_amount: 322.81, apr_rcpa: 74.0, times_apr: 2.75,
+  overall_rcpa: 337.84, so_coverage: 85.7, so_compliance: 18.3,
+  dm_coverage: 41.1, rsm_coverage: 15.1,
+  not_met_so: 190, not_met_vf: 1082, not_met_dm: 780, not_met_rsm: 1125, not_met_any: 263,
+  loyal: 262, regular: 146, occasional: 68, lost: 577, non: 272,
+  pct_not_so: 14.3, pct_not_vf: 81.7, pct_not_dm: 58.9, pct_not_rsm: 84.9, pct_not_any: 19.8,
+  pct_loyal: 19.8, pct_regular: 11.0, pct_occasional: 5.1, pct_lost: 43.5, pct_non: 20.5,
+};
+
+const regionData = [
+  { region:'ASS REGION', hcps:61, pms_amount:16.84, so_coverage:95.1, so_compliance:31.1, dm_coverage:31.1, not_met_so:3, not_met_vf:42, not_met_dm:42, not_met_any:18, loyal:20, regular:11, occasional:4, lost:14, non_prescriber:12, pct_not_met_so:4.9, pct_not_met_dm:68.9, pct_not_met_any:29.5, pct_loyal:32.8, pct_regular:18.0, pct_occasional:6.6, pct_lost:23.0, pct_non:19.7 },
+  { region:'BIH + JHK REGION', hcps:62, pms_amount:14.51, so_coverage:95.2, so_compliance:16.1, dm_coverage:50.0, not_met_so:3, not_met_vf:52, not_met_dm:31, not_met_any:6, loyal:20, regular:12, occasional:10, lost:9, non_prescriber:11, pct_not_met_so:4.8, pct_not_met_dm:50.0, pct_not_met_any:9.7, pct_loyal:32.3, pct_regular:19.4, pct_occasional:16.1, pct_lost:14.5, pct_non:17.7 },
+  { region:'CHE REGION', hcps:109, pms_amount:22.12, so_coverage:78.9, so_compliance:20.2, dm_coverage:36.7, not_met_so:23, not_met_vf:87, not_met_dm:69, not_met_any:34, loyal:23, regular:4, occasional:3, lost:53, non_prescriber:26, pct_not_met_so:21.1, pct_not_met_dm:63.3, pct_not_met_any:31.2, pct_loyal:21.1, pct_regular:3.7, pct_occasional:2.8, pct_lost:48.6, pct_non:23.9 },
+  { region:'DEL REGION', hcps:66, pms_amount:14.5, so_coverage:87.9, so_compliance:19.7, dm_coverage:36.4, not_met_so:8, not_met_vf:53, not_met_dm:42, not_met_any:11, loyal:13, regular:8, occasional:2, lost:19, non_prescriber:24, pct_not_met_so:12.1, pct_not_met_dm:63.6, pct_not_met_any:16.7, pct_loyal:19.7, pct_regular:12.1, pct_occasional:3.0, pct_lost:28.8, pct_non:36.4 },
+  { region:'HYD REGION', hcps:99, pms_amount:26.97, so_coverage:94.9, so_compliance:12.1, dm_coverage:42.4, not_met_so:5, not_met_vf:87, not_met_dm:57, not_met_any:9, loyal:15, regular:19, occasional:7, lost:32, non_prescriber:26, pct_not_met_so:5.1, pct_not_met_dm:57.6, pct_not_met_any:9.1, pct_loyal:15.2, pct_regular:19.2, pct_occasional:7.1, pct_lost:32.3, pct_non:26.3 },
+  { region:'KAR REGION', hcps:99, pms_amount:23.54, so_coverage:67.7, so_compliance:11.1, dm_coverage:28.3, not_met_so:32, not_met_vf:88, not_met_dm:71, not_met_any:30, loyal:27, regular:14, occasional:7, lost:24, non_prescriber:27, pct_not_met_so:32.3, pct_not_met_dm:71.7, pct_not_met_any:30.3, pct_loyal:27.3, pct_regular:14.1, pct_occasional:7.1, pct_lost:24.2, pct_non:27.3 },
+  { region:'KER REGION', hcps:99, pms_amount:22.29, so_coverage:72.7, so_compliance:6.1, dm_coverage:13.1, not_met_so:27, not_met_vf:93, not_met_dm:86, not_met_any:26, loyal:0, regular:0, occasional:0, lost:99, non_prescriber:0, pct_not_met_so:27.3, pct_not_met_dm:86.9, pct_not_met_any:26.3, pct_loyal:0, pct_regular:0, pct_occasional:0, pct_lost:100.0, pct_non:0 },
+  { region:'KOL REGION', hcps:142, pms_amount:42.75, so_coverage:86.6, so_compliance:21.1, dm_coverage:45.8, not_met_so:19, not_met_vf:112, not_met_dm:77, not_met_any:21, loyal:7, regular:2, occasional:2, lost:118, non_prescriber:13, pct_not_met_so:13.4, pct_not_met_dm:54.2, pct_not_met_any:14.8, pct_loyal:4.9, pct_regular:1.4, pct_occasional:1.4, pct_lost:83.1, pct_non:9.2 },
+  { region:'MUM REGION', hcps:93, pms_amount:21.65, so_coverage:80.6, so_compliance:22.6, dm_coverage:35.5, not_met_so:18, not_met_vf:72, not_met_dm:60, not_met_any:22, loyal:26, regular:16, occasional:8, lost:17, non_prescriber:26, pct_not_met_so:19.4, pct_not_met_dm:64.5, pct_not_met_any:23.7, pct_loyal:28.0, pct_regular:17.2, pct_occasional:8.6, pct_lost:18.3, pct_non:28.0 },
+  { region:'NAG + MP + CG REGION', hcps:73, pms_amount:19.8, so_coverage:90.4, so_compliance:37.0, dm_coverage:57.5, not_met_so:7, not_met_vf:46, not_met_dm:31, not_met_any:16, loyal:13, regular:16, occasional:2, lost:26, non_prescriber:16, pct_not_met_so:9.6, pct_not_met_dm:42.5, pct_not_met_any:21.9, pct_loyal:17.8, pct_regular:21.9, pct_occasional:2.7, pct_lost:35.6, pct_non:21.9 },
+  { region:'ORI REGION', hcps:71, pms_amount:18.32, so_coverage:98.6, so_compliance:4.2, dm_coverage:53.5, not_met_so:1, not_met_vf:68, not_met_dm:33, not_met_any:1, loyal:35, regular:16, occasional:6, lost:10, non_prescriber:4, pct_not_met_so:1.4, pct_not_met_dm:46.5, pct_not_met_any:1.4, pct_loyal:49.3, pct_regular:22.5, pct_occasional:8.5, pct_lost:14.1, pct_non:5.6 },
+  { region:'PJB REGION', hcps:68, pms_amount:17.37, so_coverage:85.3, so_compliance:20.6, dm_coverage:33.8, not_met_so:10, not_met_vf:54, not_met_dm:45, not_met_any:13, loyal:4, regular:0, occasional:1, lost:41, non_prescriber:22, pct_not_met_so:14.7, pct_not_met_dm:66.2, pct_not_met_any:19.1, pct_loyal:5.9, pct_regular:0, pct_occasional:1.5, pct_lost:60.3, pct_non:32.4 },
+  { region:'PUN REGION', hcps:117, pms_amount:24.2, so_coverage:86.3, so_compliance:18.8, dm_coverage:70.1, not_met_so:16, not_met_vf:95, not_met_dm:35, not_met_any:26, loyal:17, regular:18, occasional:11, lost:50, non_prescriber:21, pct_not_met_so:13.7, pct_not_met_dm:29.9, pct_not_met_any:22.2, pct_loyal:14.5, pct_regular:15.4, pct_occasional:9.4, pct_lost:42.7, pct_non:17.9 },
+  { region:'RAJ + GUJ REGION', hcps:69, pms_amount:14.6, so_coverage:91.3, so_compliance:39.1, dm_coverage:59.4, not_met_so:6, not_met_vf:42, not_met_dm:28, not_met_any:16, loyal:22, regular:3, occasional:4, lost:25, non_prescriber:15, pct_not_met_so:8.7, pct_not_met_dm:40.6, pct_not_met_any:23.2, pct_loyal:31.9, pct_regular:4.3, pct_occasional:5.8, pct_lost:36.2, pct_non:21.7 },
+  { region:'UP EAST REGION', hcps:97, pms_amount:23.35, so_coverage:87.6, so_compliance:6.2, dm_coverage:24.7, not_met_so:12, not_met_vf:91, not_met_dm:73, not_met_any:14, loyal:20, regular:7, occasional:1, lost:40, non_prescriber:29, pct_not_met_so:12.4, pct_not_met_dm:75.3, pct_not_met_any:14.4, pct_loyal:20.6, pct_regular:7.2, pct_occasional:1.0, pct_lost:41.2, pct_non:29.9 },
+];
+
+const molecules = [
+  { name:'Ceramide Moisturiser', count:704 },
+  { name:'Clindamycin + BPO', count:267 },
+  { name:'Pimecrolimus Cream', count:197 },
+  { name:'Urea + Salicylic Acid', count:104 },
+  { name:'Allium Cepa + Silicon', count:15 },
+  { name:'Multi-Molecule', count:38 },
+];
+
+// ===================== TABS =====================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const tabs = ['overview','coverage','prescribers','regions'];
+  const idx = tabs.indexOf(name);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ===================== CHARTS =====================
+let charts = {};
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function initCharts() {
+  // Stacked bar
+  const sb = document.getElementById('div-stacked');
+  const total = divData.loyal + divData.regular + divData.occasional + divData.lost + divData.non;
+  sb.innerHTML = `
+    <div class="stacked-seg" style="flex:${divData.loyal};background:#3b82f6;" title="Loyal: ${divData.loyal}">${divData.pct_loyal}%</div>
+    <div class="stacked-seg" style="flex:${divData.regular};background:#10b981;" title="Regular: ${divData.regular}">${divData.pct_regular}%</div>
+    <div class="stacked-seg" style="flex:${divData.occasional};background:#f59e0b;" title="Occasional: ${divData.occasional}">${divData.pct_occasional}%</div>
+    <div class="stacked-seg" style="flex:${divData.lost};background:#ef4444;" title="Lost: ${divData.lost}">${divData.pct_lost}%</div>
+    <div class="stacked-seg" style="flex:${divData.non};background:#6b7280;" title="Non: ${divData.non}">${divData.pct_non}%</div>
+  `;
+
+  // Prescriber Donut
+  destroyChart('prescriber-donut');
+  charts['prescriber-donut'] = new Chart(document.getElementById('prescriber-donut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Loyal','Regular','Occasional','Lost','Non-Prescriber'],
+      datasets: [{ data: [divData.loyal,divData.regular,divData.occasional,divData.lost,divData.non],
+        backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#6b7280'],
+        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 8 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { color:'#374151', font:{size:11,family:'Inter'}, padding:12 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} (${((c.raw/1325)*100).toFixed(1)}%)` } }
+      },
+      onClick: (e, els) => { if(els.length) { const i=els[0].index; const tags=['Loyal','Regular','Occasional','Lost','NP']; filterByPrescriberTag(tags[i]); switchTab('prescribers'); } }
+    }
+  });
+
+  // Molecule chart
+  destroyChart('molecule-chart');
+  charts['molecule-chart'] = new Chart(document.getElementById('molecule-chart'), {
+    type:'bar',
+    data: {
+      labels: molecules.map(m=>m.name),
+      datasets: [{ label:'HCPs', data: molecules.map(m=>m.count),
+        backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4','#ef4444'].map(c=>c+'cc'),
+        borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis:'y',
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.raw} HCPs`}} },
+      scales: {
+        x: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:'#6b7280',font:{size:11}} },
+        y: { grid:{display:false}, ticks:{color:'#374151',font:{size:11}} }
+      }
+    }
+  });
+
+  // Coverage region chart
+  const labels = regionData.map(r=>r.region.replace(' REGION','').replace('  ',''));
+  destroyChart('coverage-region-chart');
+  charts['coverage-region-chart'] = new Chart(document.getElementById('coverage-region-chart'), {
+    type:'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'SO Coverage %', data: regionData.map(r=>r.so_coverage), backgroundColor:'#3b82f6aa', borderRadius:4 },
+        { label:'DM Coverage %', data: regionData.map(r=>r.dm_coverage), backgroundColor:'#f59e0baa', borderRadius:4 },
+        { label:'Not Met Any %', data: regionData.map(r=>r.pct_not_met_any), backgroundColor:'#ef4444aa', borderRadius:4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels:{color:'#374151',font:{size:11,family:'Inter'}} } },
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#6b7280',font:{size:10},maxRotation:45} },
+        y: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:'#6b7280',font:{size:11}}, max:110 }
+      },
+      onClick: (e, els) => { if(els.length) openRegionModal(regionData[els[0].index]); }
+    }
+  });
+
+  // SO Compliance list
+  const compList = document.getElementById('so-compliance-list');
+  compList.innerHTML = regionData.sort((a,b)=>a.so_compliance-b.so_compliance).map(r=>`
+    <div class="coverage-row" style="cursor:pointer;" onclick='openRegionModal(${JSON.stringify(r)})'>
+      <div class="coverage-row-header">
+        <div class="coverage-label">${r.region.replace(' REGION','').replace('  ','')}</div>
+        <div class="coverage-value" style="color:${r.so_compliance<20?'var(--red)':r.so_compliance<40?'var(--amber)':'var(--green)'}">${r.so_compliance.toFixed(1)}%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill ${r.so_compliance<20?'red':r.so_compliance<40?'amber':'green'}" style="width:${r.so_compliance}%"></div></div>
+    </div>
+  `).join('');
+
+  // Not-met chart
+  destroyChart('not-met-chart');
+  charts['not-met-chart'] = new Chart(document.getElementById('not-met-chart'), {
+    type:'bar',
+    data: {
+      labels: ['Not Met\nby SO','Not Met\nper VF','Not Met\nby DM','Not Met\nby RSM','Not Met\nby Any'],
+      datasets: [{ label:'# of HCPs', data:[190,1082,780,1125,263],
+        backgroundColor:['#f59e0b','#ef4444','#ef4444','#ef4444','#dc2626'],
+        borderRadius:6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.raw} HCPs`}} },
+      scales: {
+        x:{grid:{display:false},ticks:{color:'#6b7280',font:{size:10}}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7280',font:{size:11}}}
+      }
+    }
+  });
+
+  // Prescriber region stacked
+  const sortedRegions = [...regionData].sort((a,b)=>b.hcps-a.hcps);
+  destroyChart('prescriber-region-stacked');
+  charts['prescriber-region-stacked'] = new Chart(document.getElementById('prescriber-region-stacked'), {
+    type:'bar',
+    data: {
+      labels: sortedRegions.map(r=>r.region.replace(' REGION','').replace('  ','')),
+      datasets: [
+        { label:'Loyal', data:sortedRegions.map(r=>r.loyal), backgroundColor:'#3b82f6', stack:'a' },
+        { label:'Regular', data:sortedRegions.map(r=>r.regular), backgroundColor:'#10b981', stack:'a' },
+        { label:'Occasional', data:sortedRegions.map(r=>r.occasional), backgroundColor:'#f59e0b', stack:'a' },
+        { label:'Lost', data:sortedRegions.map(r=>r.lost), backgroundColor:'#ef4444', stack:'a' },
+        { label:'Non', data:sortedRegions.map(r=>r.non_prescriber), backgroundColor:'#6b7280', stack:'a' },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{color:'#374151',font:{size:11,family:'Inter'}}} },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{color:'#6b7280',font:{size:9},maxRotation:45}},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7280',font:{size:11}}}
+      },
+      onClick:(e,els)=>{ if(els.length) openRegionModal(sortedRegions[els[0].index]); }
+    }
+  });
+
+  // Lost chart
+  destroyChart('lost-chart');
+  const lostSorted = [...regionData].sort((a,b)=>b.pct_lost-a.pct_lost);
+  charts['lost-chart'] = new Chart(document.getElementById('lost-chart'), {
+    type:'bar', data:{
+      labels: lostSorted.map(r=>r.region.replace(' REGION','').replace('  ','')),
+      datasets:[{label:'Lost %',data:lostSorted.map(r=>r.pct_lost),
+        backgroundColor: lostSorted.map(r=>r.pct_lost>60?'#dc2626':r.pct_lost>40?'#ef4444':r.pct_lost>25?'#f59e0b':'#10b981'),
+        borderRadius:4}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Lost: ${c.raw.toFixed(1)}%`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7280',font:{size:9},maxRotation:45}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7280',font:{size:11}},max:110}
+      },
+      onClick:(e,els)=>{ if(els.length) openRegionModal(lostSorted[els[0].index]); }
+    }
+  });
+
+  // Action list
+  const actionList = document.getElementById('action-list');
+  const actions = [
+    {tag:'Loyal',count:262,pct:19.8,color:'#3b82f6',action:'Maintain visit frequency. Deepen engagement with premium products. Recognize loyalty.',icon:'💙'},
+    {tag:'Regular',count:146,pct:11.0,color:'#10b981',action:'Increase RCPA. Introduce additional molecules. Bridge to Loyal tier.',icon:'💚'},
+    {tag:'Occasional',count:68,pct:5.1,color:'#f59e0b',action:'Intensify visits. Share clinical evidence. Target conversion to Regular.',icon:'🟡'},
+    {tag:'Lost',count:577,pct:43.5,color:'#ef4444',action:'CRITICAL: Immediate DM intervention. Root cause analysis per region. Recovery plan.',icon:'🔴'},
+    {tag:'Non-Prescriber',count:272,pct:20.5,color:'#8b5cf6',action:'New HCP activation. Detailing sessions. KOL references. Product sampling.',icon:'⚫'},
+  ];
+  actionList.innerHTML = actions.map(a=>`
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;background:#f8f9fb;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;" onclick="filterByPrescriberTag('${a.tag}')">
+      <div style="font-size:20px">${a.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13px;color:${a.color}">${a.tag}</span>
+          <span style="font-size:12px;color:${a.color};font-weight:600;">${a.count} (${a.pct}%)</span>
+        </div>
+        <div style="font-size:11px;color:#6b7280;line-height:1.5">${a.action}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Build region table
+  buildRegionTable(regionData);
+}
+
+// ===================== REGION TABLE =====================
+let currentSort = { col: -1, dir: 1 };
+let currentFilter = 'all';
+let currentSearch = '';
+
+function buildRegionTable(data) {
+  const tbody = document.getElementById('region-tbody');
+  tbody.innerHTML = data.map(r => {
+    const statusClass = r.pct_lost > 60 ? 'bad' : r.pct_lost > 40 ? 'warn' : 'good';
+    const statusText = r.pct_lost > 60 ? '🔴 Critical' : r.pct_lost > 40 ? '🟡 Watch' : '🟢 Stable';
+    const soClass = r.so_coverage < 75 ? 'bad' : r.so_coverage < 85 ? 'warn' : 'good';
+    return `<tr onclick='openRegionModal(${JSON.stringify(r)})'>
+      <td style="font-weight:600;min-width:140px">${r.region.replace(' REGION','').replace('  ','')}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${r.hcps}</td>
+      <td>₹${r.pms_amount.toFixed(1)}L</td>
+      <td><span class="tag ${soClass}">${r.so_coverage}%</span></td>
+      <td>${r.dm_coverage.toFixed(1)}%</td>
+      <td style="color:${r.not_met_any>20?'var(--red)':'var(--text)'};font-weight:600;">${r.not_met_any} (${r.pct_not_met_any}%)</td>
+      <td style="color:var(--loyal);font-weight:600;">${r.loyal}</td>
+      <td style="color:${r.pct_lost>60?'var(--red)':r.pct_lost>40?'var(--amber)':'var(--green)'};font-weight:700;">${r.pct_lost.toFixed(1)}%</td>
+      <td style="min-width:150px;">
+        <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:1px;">
+          <div style="flex:${r.loyal};background:#3b82f6;"></div>
+          <div style="flex:${r.regular};background:#10b981;"></div>
+          <div style="flex:${r.occasional};background:#f59e0b;"></div>
+          <div style="flex:${r.lost};background:#ef4444;"></div>
+          <div style="flex:${r.non_prescriber};background:#6b7280;"></div>
+        </div>
+      </td>
+      <td><span class="tag ${statusClass}">${statusText}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchTable(val) {
+  currentSearch = val.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters() {
+  let filtered = [...regionData];
+  if(currentFilter === 'high_lost') filtered = filtered.filter(r=>r.pct_lost>40);
+  else if(currentFilter === 'low_so') filtered = filtered.filter(r=>r.so_coverage<80);
+  else if(currentFilter === 'not_met') filtered = filtered.filter(r=>r.pct_not_met_any>20);
+  if(currentSearch) filtered = filtered.filter(r=>r.region.toLowerCase().includes(currentSearch));
+  if(currentSort.col >= 0) filtered = sortData(filtered, currentSort.col, currentSort.dir);
+  buildRegionTable(filtered);
+}
+
+function sortTable(col) {
+  currentSort = { col, dir: currentSort.col === col ? -currentSort.dir : 1 };
+  document.querySelectorAll('.region-table th').forEach((th,i)=>{
+    th.classList.toggle('sorted', i===col);
+    const arrow = th.querySelector('.sort-arrow');
+    if(arrow) arrow.textContent = i===col ? (currentSort.dir===1?'↓':'↑') : '↕';
+  });
+  applyFilters();
+}
+
+function sortData(data, col, dir) {
+  const keys = ['region','hcps','pms_amount','so_coverage','dm_coverage','not_met_any','loyal','pct_lost'];
+  return [...data].sort((a,b)=>{
+    const v1 = a[keys[col]], v2 = b[keys[col]];
+    return typeof v1==='string' ? dir*v1.localeCompare(v2) : dir*(v1-v2);
+  });
+}
+
+// ===================== MODAL =====================
+const modalDefs = {
+  hcps: { title:'PMS HCPs – 1,325', sub:'Division AVECEA · DERMA Cluster', stats:[
+    {label:'Total PMS HCPs',val:'1,325',color:'#3b82f6'},
+    {label:'Dermatologists',val:'1,203 (90.8%)',color:'#10b981'},
+    {label:'General Practitioners',val:'58 (4.4%)',color:'#f59e0b'},
+    {label:'Paediatricians',val:'40 (3.0%)',color:'#8b5cf6'},
+  ], note:'PMS HCPs are doctors committed to prescribing specific molecules. Total 1,325 doctors across 15 regions.' },
+  pms_amount: { title:'PMS Amount – ₹322.81 Lakhs', sub:'Total investment committed', stats:[
+    {label:'Total PMS Amount',val:'₹322.81L',color:'#10b981'},
+    {label:'Avg per HCP',val:'₹24,363',color:'#3b82f6'},
+    {label:'Max (single HCP)',val:'₹3,33,800',color:'#f59e0b'},
+    {label:'Median Amount',val:'₹20,000',color:'#8b5cf6'},
+  ], note:'PMS Amount represents the committed promotional investment per doctor for the molecule.' },
+  apr_rcpa: { title:'APR RCPA – ₹74 Lakhs', sub:'Engaged Molecule RCPA for April', stats:[
+    {label:'APR RCPA (Mol.)',val:'₹74L',color:'#f59e0b'},
+    {label:'# of Times APR',val:'2.75×',color:'#10b981'},
+    {label:'Overall RCPA APR',val:'₹337.8L',color:'#3b82f6'},
+    {label:'Overall # Times',val:'12.6×',color:'#8b5cf6'},
+  ], note:'RCPA = Retail Chemist Prescription Audit. Engaged mol. RCPA measures doctor prescribing of AVECEA promoted molecules.' },
+  overall_rcpa: { title:'Overall RCPA – ₹337.8L', sub:'All molecule combined RCPA', stats:[
+    {label:'Overall RCPA APR',val:'₹337.8L',color:'#3b82f6'},
+    {label:'# Times Overall',val:'12.6×',color:'#10b981'},
+    {label:'Engaged Mol. RCPA',val:'₹74L',color:'#f59e0b'},
+    {label:'Engaged Share',val:'21.9%',color:'#8b5cf6'},
+  ], note:'Overall RCPA captures all prescriptions written by PMS doctors, including competitor products.' },
+  not_met: { title:'Not Met by Any – 263 HCPs', sub:'HCPs missed by entire hierarchy', stats:[
+    {label:'Not Met by Any',val:'263 (19.8%)',color:'#ef4444'},
+    {label:'Not Met by SO',val:'190 (14.3%)',color:'#f59e0b'},
+    {label:'Not Met per VF',val:'1,082 (81.7%)',color:'#ef4444'},
+    {label:'Not Met by DM',val:'780 (58.9%)',color:'#ef4444'},
+  ], note:'CRITICAL: 263 HCPs have not been visited by any field representative. These are high-priority doctors for immediate action.' },
+  so_cov: { title:'SO Coverage – 85.7%', sub:'Field force reach analysis', stats:[
+    {label:'SO Coverage',val:'85.7%',color:'#8b5cf6'},
+    {label:'SO Compliance (VF)',val:'18.3%',color:'#ef4444'},
+    {label:'DM Coverage',val:'41.1%',color:'#f59e0b'},
+    {label:'RSM Coverage',val:'15.1%',color:'#ef4444'},
+  ], note:'SO Compliance (VF) is critically low at 18.3%, meaning only 243 of 1,325 HCPs are being visited at the prescribed visit frequency.' },
+};
+
+function openModal(key) {
+  const d = modalDefs[key];
+  if(!d) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">${d.title}</div>
+    <div class="modal-sub">${d.sub}</div>
+    <div class="modal-grid">
+      ${d.stats.map(s=>`<div class="modal-stat"><div class="modal-stat-label">${s.label}</div><div class="modal-stat-val" style="color:${s.color}">${s.val}</div></div>`).join('')}
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:12px;color:#374151;line-height:1.6;">
+      💡 <strong style="color:#1a2332">Insight:</strong> ${d.note}
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function openRegionModal(r) {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">📍 ${r.region}</div>
+    <div class="modal-sub">AVECEA Division · DERMA Cluster · APR 2026</div>
+    <div class="modal-grid">
+      <div class="modal-stat"><div class="modal-stat-label">PMS HCPs</div><div class="modal-stat-val" style="color:#3b82f6">${r.hcps}</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">PMS Amount</div><div class="modal-stat-val" style="color:#10b981">₹${r.pms_amount.toFixed(2)}L</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">SO Coverage</div><div class="modal-stat-val" style="color:${r.so_coverage<80?'#ef4444':'#10b981'}">${r.so_coverage}%</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">SO Compliance (VF)</div><div class="modal-stat-val" style="color:${r.so_compliance<20?'#ef4444':'#f59e0b'}">${r.so_compliance.toFixed(1)}%</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">DM Coverage</div><div class="modal-stat-val" style="color:#f59e0b">${r.dm_coverage.toFixed(1)}%</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Not Met by Any</div><div class="modal-stat-val" style="color:#ef4444">${r.not_met_any} (${r.pct_not_met_any}%)</div></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="card-title">Prescriber Mix</div>
+      <div style="display:flex;height:24px;border-radius:8px;overflow:hidden;gap:2px;margin-bottom:12px;">
+        <div style="flex:${r.loyal};background:#3b82f6;" title="Loyal: ${r.loyal}"></div>
+        <div style="flex:${r.regular};background:#10b981;" title="Regular: ${r.regular}"></div>
+        <div style="flex:${r.occasional};background:#f59e0b;" title="Occasional: ${r.occasional}"></div>
+        <div style="flex:${r.lost};background:#ef4444;" title="Lost: ${r.lost}"></div>
+        <div style="flex:${r.non_prescriber};background:#6b7280;" title="Non: ${r.non_prescriber}"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center;font-size:11px;">
+        <div><div style="color:#1d6fc4;font-weight:700">${r.loyal}</div><div style="color:#6b7280">Loyal</div></div>
+        <div><div style="color:#16a34a;font-weight:700">${r.regular}</div><div style="color:#6b7280">Regular</div></div>
+        <div><div style="color:#d97706;font-weight:700">${r.occasional}</div><div style="color:#6b7280">Occasional</div></div>
+        <div><div style="color:#dc2626;font-weight:700">${r.lost}</div><div style="color:#6b7280">Lost</div></div>
+        <div><div style="color:#6b7280;font-weight:700">${r.non_prescriber}</div><div style="color:#6b7280">Non-Presc.</div></div>
+      </div>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;font-size:12px;color:#374151;line-height:1.6;">
+      🎯 <strong style="color:#1a2332">Priority Action:</strong> ${
+        r.pct_lost > 60 ? `CRITICAL: ${r.pct_lost.toFixed(1)}% Lost Prescribers. Urgent DM-led recovery visits needed. Review visit frequency compliance (${r.so_compliance.toFixed(1)}%).` :
+        r.so_coverage < 80 ? `Low SO Coverage at ${r.so_coverage}%. Identify and resolve field force gaps immediately.` :
+        r.not_met_any > 20 ? `${r.not_met_any} HCPs unreachable by any hierarchy level. Escalate to RSM for coverage plan.` :
+        `Relatively stable. Focus on improving SO Compliance (${r.so_compliance.toFixed(1)}%) and DM Coverage (${r.dm_coverage.toFixed(1)}%).`
+      }
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+function filterByPrescriberTag(tag) {
+  console.log('Filter by:', tag);
+  // Could drill into region table filtered by tag
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', () => { initCharts(); buildRegionTable(regionData); });
+window.addEventListener('load', () => { initCharts(); buildRegionTable(regionData); });
+</script>
+</body>
+</html>
